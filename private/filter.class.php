@@ -64,7 +64,19 @@ class filter {
         // mod by muHum begin
         if (config::authentication == "rtdauth") {
             $ip = $_SERVER['REMOTE_ADDR'];
+
+            $ip4 = null;
             $ip6 = null;
+
+            if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+                // Valid IPv6 data
+                $ip6 = $ip;
+            }  else if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+                // Valid IPv4 data
+                $ip4 = $ip;
+            } else {
+                status::sendErrorMessage('Error: Invalid IP data received', true, 400);
+            }
 
             worker::setHostname(config::myDynDNSDomain);
         } else {
@@ -72,14 +84,14 @@ class filter {
                 status::sendErrorMessage('Error: DynDNS Request invalid', true, 400);
             }
 
-            $ip = $get['ip'];
+            $ip4 = $get['ip'];
             $ip6 = $get['ip6'];
 
             //set local variables
             worker::setHostname($get['hostname']);
         }
 
-        worker::setIPv4($ip);
+        worker::setIPv4($ip4);
         worker::setIPv6($ip6);
         // modification end
         
